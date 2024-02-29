@@ -6,12 +6,13 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 from bot import Bot
 class MainWindow(QMainWindow):
-
     
     increase_loading_bar = pyqtSignal()
     decrease_loading_bar = pyqtSignal()
     def __init__(self):
         super().__init__()
+        self.Pause=True
+        self.Result=0
         self.bot=Bot(window=None)
         #connect ths signal by the two functions of the increase and decrease
         self.increase_loading_bar.connect(self.increase_loading)
@@ -44,19 +45,30 @@ class MainWindow(QMainWindow):
         self.percentage_label.setText(f"{self.loading_value}%")
 
     def increase_loading(self):
-        self.loading_value = min(100, self.loading_value + 2)
-        self.loading_bar.setValue(self.loading_value)
-        self.update_percentage_label()
+        if(self.Pause==False):
+            self.loading_value = min(100, self.loading_value + 2)
+            self.Result =min(100,self.Result+2)
+            self.loading_bar.setValue(self.loading_value)
+            self.update_percentage_label()
 
     def decrease_loading(self):
-        self.loading_value = max(0, self.loading_value - 2)
-        self.loading_bar.setValue(self.loading_value)
-        self.update_percentage_label()         
+        if(self.Pause==False):
+            self.loading_value = max(0, self.loading_value - 2)
+            self.Result =max(0,self.Result-2)
+            self.loading_bar.setValue(self.loading_value)
+            self.update_percentage_label()         
 
     def equalBots(self,bot):
         self.bot=bot
 
     def closeEvent(self, a0: QCloseEvent | None) -> None:
-        print("here")
         self.bot.closee()
-        return super().closeEvent(a0)        
+        return super().closeEvent(a0)
+    
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_R:   ##resett
+            self.loading_bar.setValue(0)
+        elif event.key() == Qt.Key.Key_P: ##pasues  
+            self.Pause=True
+        elif event.key() == Qt.Key.Key_S: ##resume
+            self.Pause=False           
